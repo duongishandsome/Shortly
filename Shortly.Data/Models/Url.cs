@@ -9,5 +9,7 @@
         public int? UserId { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime? DateUpdated { get; set; }
+
+        public User? User { get; set; }
     }
 }

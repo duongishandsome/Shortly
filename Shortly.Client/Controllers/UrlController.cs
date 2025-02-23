@@ -1,39 +1,38 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Shortly.Client.Data.ViewModels;
+using Shortly.Data;
 
 namespace Shortly.Client.Controllers
 {
     public class UrlController : Controller
     {
+        private AppDbContext _context { get; set; }
+        public UrlController(AppDbContext context)
+        {
+            _context = context;
+        }
+
         public IActionResult Index()
         {
-            var allUrls = new List<GetUrlVM>()
-            {
-                new GetUrlVM()
-                {
-                    Id = 1,
-                    OriginalLink = "https://link1.com",
-                    ShortLink = "hqel",
-                    NrOfClicks = 1,
-                    UserId = 1
-                },
-                new GetUrlVM()
-                {
-                    Id = 2,
-                    OriginalLink = "https://link2.com",
-                    ShortLink = "hqel",
-                    NrOfClicks = 1,
-                    UserId = 1
-                },
-                new GetUrlVM()
-                {
-                    Id = 3,
-                    OriginalLink = "https://link3.com",
-                    ShortLink = "hqel",
-                    NrOfClicks = 1,
-                    UserId = 1
-                }
-            };
+            var allUrls = _context
+               .Urls
+               .Include(n => n.User)
+               .Select(url => new GetUrlVM()
+               {
+                   Id = url.Id,
+                   OriginalLink = url.OriginalLink,
+                   ShortLink = url.ShortLink,
+                   NrOfClicks = url.NrOfClicks,
+                   UserId = url.UserId,
+                   User = url.User != null ? new GetUserVM()
+                   {
+                       Id = url.User.Id,
+                       FullName = url.User.FullName
+                   } : null
+               })
+               .ToList();
+
             return View(allUrls);
         }
 
@@ -44,12 +43,10 @@ namespace Shortly.Client.Controllers
 
         public IActionResult Remove(int id)
         {
-            return View();
-        }
-
-        public IActionResult Remove(int userId, int linkId)
-        {
-            return View();
+            var url = _context.Urls.FirstOrDefault(n => n.Id == id);
+            _context.Urls.Remove(url);
+            _context.SaveChanges();
+            return RedirectToAction("Index");
         }
     }
 }
