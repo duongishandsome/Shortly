@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shortly.Client.Data.ViewModels;
 using Shortly.Data;
+using Shortly.Data.Models;
 using Shortly.Data.Services;
 
 namespace Shortly.Client.Controllers
@@ -17,22 +18,22 @@ namespace Shortly.Client.Controllers
             _mapper = mapper;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var allUrls = _urlsService.GetUrls();
-            var mappedAllUrls = _mapper.Map<List<GetUrlVM>>(allUrls);
+            var allUrls = await _urlsService.GetUrlsAsync();
+            var mappedAllUrls = _mapper.Map<List<Url>, List<GetUrlVM>>(allUrls);
 
             return View(mappedAllUrls);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             return RedirectToAction("Index");
         }
 
-        public IActionResult Remove(int id)
+        public async Task<IActionResult> Remove(int id)
         {
-            _urlsService.Delete(id);
+            await _urlsService.DeleteAsync(id);
             return RedirectToAction("Index");
         }
     }
