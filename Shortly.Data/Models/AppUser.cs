@@ -1,13 +1,13 @@
-﻿namespace Shortly.Data.Models
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace Shortly.Data.Models
 {
-    public class User
+    public class AppUser : IdentityUser
     {
-        public User()
+        public AppUser()
         {
             Urls = new List<Url>();
         }
-        public int Id { get; set; }
-        public string Email { get; set; }
         public string? FullName { get; set; }
         public List<Url> Urls { get; set; }
     }

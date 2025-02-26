@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shortly.Client.Data;
 using Shortly.Data;
+using Shortly.Data.Models;
 using Shortly.Data.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +13,34 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+//Confiure Authentication
+builder.Services.AddIdentity<AppUser, IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+    options.LoginPath = "/Authentication/Login";
+    options.SlidingExpiration = true;
+});
+
+//3. Update the default password settings
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    //Password settings
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredLength = 5;
+
+    //Lockout settings
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
 });
 
 builder.Services.AddScoped<IUrlsService, UrlsService>();
@@ -44,6 +74,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 //Seed the database
-DbInitializer.SeedDefaultData(app);
+DbInitializer.SeedDefaultUsersAndRolesAsync(app).Wait();
 
 app.Run();
