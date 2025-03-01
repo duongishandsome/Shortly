@@ -1,9 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Shortly.Client.Data.ViewModels;
 using Shortly.Client.Helpers;
-using Shortly.Data;
 using Shortly.Data.Models;
 using Shortly.Data.Services;
 using System.Security.Claims;
